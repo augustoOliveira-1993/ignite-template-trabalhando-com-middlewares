@@ -24,19 +24,47 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if (user.pro === true) return next();
+
+  if (user.todos.length < 10) return next();
+
+  return response.status(403).json({ error: "Limit exceeded" });
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  if (!validate(id)) {
+    return response.status(400).json({ error: "Id invalid" });
+  }
+
+  const user = users.find((user) => user.username === username);
+
+  if (!user) {
+    return response.status(404).json({ error: "user does not exist" });
+  }
+
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "todo does not exist" });
+  }
+
+  request.user = user;
+  request.todo = todo;
+
+  return next();
 }
 
 function findUserById(request, response, next) {
-  const { id } = request.headers;
+  const { id } = request.params;
 
   const user = users.find((user) => user.id === id);
 
-  if (!userId) {
+  if (!user) {
     return response.status(404).json({ error: "User not found" });
   }
 
